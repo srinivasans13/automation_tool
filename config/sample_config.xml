@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<Config>
+    <AppUnzip>
+        <Test ID="1">
+            <title>App Unzip tests : perform checks on the android-manifest.xml and various folders of the unzipped app</title>
+            <Folder FolderName="assets">
+                <verification_keys>CN=Android Debug</verification_keys>
+                <description>For a hybrid application, upon reverse engineering, we will check for www (webcontent) folder. upon apk deployment, this www folder either should be zipped and encrypted which should not be unzipped. If www folder is accessible then the same can be tampered and repackaged thereby vulnerable to code tampering.</description>
+            </Folder>
+            <Folder FolderName="lib">
+                <verification_keys>CN=Android Debug</verification_keys>
+		        <description>Check for any decompilable libraries</description>
+            </Folder>
+            <Folder FolderName="original">
+                <verification_keys>CN=Android Debug</verification_keys>
+		        <description>If the app is signed with debug key , this term willbe seen in that file "Android Debug0". If an app is signed with debug key then it cannot be uploaded to play store.	An App signed with debug key cannot be published to Google Play Store. However, it can be distributed via unauthorized parties or stores, which can modify the App maliciously and resign with the same debug key as it is publicly available, leaving no sign of App being tampered. This may lead to breach of Integrity.</description>
+            </Folder>
+            <Folder FolderName="res">
+                <verification_keys>CN=Android Debug</verification_keys>
+		        <description>Check for any sensitive info like hardcoded information in the resources files inside the folder.For hybrid app, check for the xml folder and find config.xml file and check for the attributes like access origin : * (CORS) and any other sensitive information which can be hardcoded in the resource files.</description>
+            </Folder>
+            <Folder FolderName="smali">
+                <verification_keys>CN=Android Debug</verification_keys>
+		        <description>When you create an application code, the apk file contains a .dex file, which contains binary Dalvik bytecode. This is the format that the platform actually understands. However, it's not easy to read or modify binary code, so there are tools out there to convert to and from a human readable representation. The most common human readable format is known as Smali</description>
+            </Folder>
+            <Folder FolderName="AndroidManifest">
+                <verification_keys>allowBackup\s*=\s*"*true"* android:*debuggable\s*=\s*"*true"* android:*exported\s*=\s*"*true"*</verification_keys>
+		        <description>1. Upon reverse engineering we can fetch the android manifest file in which need to check various vulnerability scenarios such as the following:(i). To check if the application has 'allowBackup: true'.android:allowBackup' attribute allows App to participate in the backup and restore infrastructure. If this attribute is set to false, no backup or restore of the App will be performed, even by a full-system backup that would otherwise cause all App data to be saved through adb. The default value of this attribute is true which has security implications. If this flag remains set to true, App data can be backed up and restored by the user either using adb (android debug bridge) or any third party App that is available in the play store (example: App Backup and Restore). Once backed up, all App data can be read by the user. adb restore allows creation of App data from a source specified by the user. Following a restore, Apps should not assume that the data, file permissions and directory permissions were created by the App itself and therefore they can be exploited to obtain sensitive information.(ii). To check if the app is signed with debug keyThis is checked after reverse engineering. This has nothing to do with manifest file. this can be checked in Original--->META-INF--->CERT.RSAIf the app is signed with debug key , this term willbe seen in that file "Android Debug0". If an app is signed with debug key then it cannot be uploaded to play store.An App signed with debug key cannot be published to Google Play Store. However, it can be distributed via unauthorized parties or stores, which can modify the App maliciously and resign with the same debug key as it is publicly available, leaving no sign of App being tampered. This may lead to breach of Integrity.(iii). To check if the app has debuggable set to trueIf this attribute is set to true then it means that the application can be debuggable if the device is connected with a pc that has android debug bridge installed. Android allows a developer to debug the App during development. The debugging mode can be activated by setting 'android:debuggable' attribute to true in AndroidManifest.xml file of the App. An attacker can establish a connection between debugger and malicious App, which may allow manipulation of the legitimate App. This can result in the execution of an arbitrary code and undesirable disclosure of sensitive data, which may lead to breach of Integrity and Confidentiality.(iv). To check if any activity/service/receiver/provider has 'exported:true'.If an activity has exported to true then it means that any other application can access that particular activity with the package name. If an activity that is supposed to load after authenticating has this check, then authentication can be bypassed by another application with the activity name and the package name. This logic is applicable to other components such as service, receiver and provider.</description>
+            </Folder>
+            <Folder FolderName="permissions">
+                <verification_keys>permission</verification_keys>
+		        <description>(v). Check the permissionsfor an application that requires only few permissions, say, the application is a camera app and it should require only permissions related to camera. If the app has any other permission that is unnecessary, then any other apps on the device can misuse the permission of this application.</description>
+            </Folder>
+        </Test>
+    </AppUnzip>
+</Config>

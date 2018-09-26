@@ -1,0 +1,172 @@
+<Tests>
+<Test_iOS_1>
+    <title>Insecure App Transport Security</title>
+    <owasp>M3 - Insecure Communication</owasp>
+    <severity>Medium</severity>
+    <Compliance>Not Applicable</Compliance>
+    <abstract>App Transport Security (ATS) is a technology that requires an app to either support best practice HTTPS security or statically declare its security limitations via a property in its Info.plist. 
+        App Transport Security (ATS) is enabled as a system default behavior. When ATS is enabled, it forces an app to connect to web services over an HTTPS connection rather than HTTP, 
+       which keeps user data secure while in transit by encrypting it.</abstract>
+    <test_function>check_for_app_transport_security</test_function>
+    <verification_type>plist</verification_type>
+    <description>For debugging and development purposes, developers enable the ATS keys and set required insecure values
+        to avoid the exceptions and proper working of app. These keys and values should be removed before app goes to
+        production.You can opt-out of ATS for certain URLs in your Info.plist by using NSExceptionDomains. Within the NSExceptionDomains dictionary you can explicitly define URLs 
+     that you need exceptions for with ATS. The exceptions you can use are: NSIncludesSubdomains
+NSExceptionAllowsInsecureHTTPLoads
+NSExceptionRequiresForwardSecrecy
+NSExceptionMinimumTLSVersion
+NSThirdPartyExceptionAllowsInsecureHTTPLoads
+NSThirdPartyExceptionMinimumTLSVersion
+NSThirdPartyExceptionRequiresForwardSecrecy
+Each of these keys allows you to granularly disable ATS or particular ATS options on domains where you are unable to support them.
+            </description>
+    <remediation>- NSAllowsArbitraryLoads attribute should not be set to yes. Whitelist domains, if it is set to yes.
+        - Pls refer below link for more information :
+        https://developer.apple.com/library/ios/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/do
+        c/uid/TP40009251-SW33
+    </remediation>
+</Test_iOS_1>
+<Test_iOS_2>
+    <title>Scan For Declared URL Schemes</title>
+    <owasp>M7 - Client Code Quality</owasp>
+    <severity>Medium</severity>
+    <Compliance>NIST SP800-53 R2 SI-2</Compliance>
+    <abstract>Custom URL schemes are not just limited to launching the other App, but additional information can be
+        passed to other App through the URL. If not implemented properly, it may lead to successful malicious script
+        injection, corruption of data in the App and could also leak sensitive information by returning a result to its
+        caller upon completion. This may lead to loss of Integrity.
+    </abstract>
+    <test_function>check_for_declared_URL_schemes</test_function>
+    <verification_type>plist</verification_type>
+    <description>Apple provides the Ability to launch an third party App either from the browser or from another App through
+        Custom URL schemes. It allows
+        external sources to launch Apps without user interaction. The following delegate method must be used to validate
+        custom URL schemes:
+        'application:openURL:sourceApplication:annotation:'. If this method is not implemented, then the deprecated
+        'application:handleOpenURL:' method is called. This deprecated method does not provide all the parameters to
+        validate the URL
+        schemes, therefore it is important to override it with the delegate method
+        'application:openURL:sourceApplication:annotation:' explicitly
+    </description>
+    <remediation>- Ensure that URL schemes input data is validated and sanitised. Implement the following method to
+        validate and sanitise the URL:
+        (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString
+        *)sourceApplication
+        annotation:(id)annotation { // Validate if the source App is acceptable and is a secure source // if yes, parse
+        the URL and validate URL
+        input data // if transactional, ask the user for authentication // if authorised, navigate appropriately }
+        - Encrypt sensitive data before passing it as input to the URL schemes.
+    </remediation>
+</Test_iOS_2>
+<Test_iOS_3>
+    <title>CryptID Scan</title>
+    <owasp>M9 - Reverse Engineering</owasp>
+    <severity>Medium</severity>
+    <Compliance>Not Applicable</Compliance>
+    <abstract>A lack of binary protections within a mobile app exposes the application and its owner to a large variety
+        of technical and business risks if underlying application is insecure or exposes sensitive intellectual
+        property. A lack of binary protection results in a mobile app that can be analyzed, reverse- engineered and
+        modified by an adversary in rapid fashion. 
+    </abstract>
+    <test_function>cryptid_check</test_function>
+    <verification_type>executable</verification_type>
+    <description>In reversing iOS applications, often the first step includes removing the App Store encryption.
+        Removing this encryption allows an
+        attacker to get a greater understanding of the internal class structure and hoe the application binary works and
+        allows them to get the
+        binary in a suitable state of reverse engineering.</description>
+    <remediation>Code in the url link below checks for the existence of LC_ENCRYPTION_INFO, and verifies that encryption
+        is still enabled.
+        http://landonf.bikemonkey.org/2009/02/index.html
+    </remediation>
+</Test_iOS_3>
+<Test_iOS_4>
+    <title>Stack Smash Protection Scan</title>
+    <owasp>M9 - Reverse Engineering</owasp>
+    <severity>Medium</severity>
+    <Compliance>NIST SP800-53 R2 CM-5</Compliance>
+    <abstract>Variables whose memory is allocated on the stack need to be carefully managed so that data stored in them
+        will not exceed the stack space that has been allocated. If a malicious security cracker is able to
+        intentionally
+        exceed the stack space allocated to a variable, he or she can use malformed data to actually affect program
+        control
+        flow in a deliberate way. This sort of security compromise is known as a 'stack-smashing attack' and it may lead
+        to
+        OS compromise
+    </abstract>
+    <test_function>stack_smash_protection_check</test_function>
+    <verification_type>executable</verification_type>
+    <description>Stack smashing protection is an exploit mitigation technique that protects against stack overflow attacks by placing a random value known as stack canary 
+before local variables on stack. The stack canary is checked upon return of the function. In case of an overflow, the canary is corrupted, and the application is able to 
+detect and protect against the overflow. In order to take advantage of the stack smashing protection, the application should be compiled with the -fstack-protector-all flag.    </description>
+    <remediation>iOS applications which use the stack canaries will contain _stack_chk_fail and _stack_chk_guard symbols in the binary.</remediation>
+</Test_iOS_4>
+<Test_iOS_5>
+    <title>Pie Flag Vulnerability Scan</title>
+    <owasp>M9 - Reverse Engineering</owasp>
+    <severity>Medium</severity>
+    <Compliance>NIST SP800-53 R2 CM-5</Compliance>
+    <abstract>Address space layout randomization (ASLR) is a memory-protection process for operating systems (OSes) that 
+    guards against buffer-overflow attacks by randomizing the location where system executables are loaded into memory.</abstract>
+    <test_function>pie_flag_check</test_function>
+    <verification_type>executable</verification_type>
+    <description>Position Independent Code (PIC) is a code that can be loaded and run from anywhere in the virtual
+        memory, that is, it does not need to
+        be loaded at a fixed address. An App that comprises of PIC is linked as a PIE and ensures security, by allowing
+        the dynamic loader at
+        run-time to slide the App binary to a random location in virtual memory. This process eliminates a vector of
+        attack that relies on otherwise
+        predictable load offsets. To compile an App with a PIE flag, set the flags Generate Position-Dependent Code' and
+        Don't Create Position
+        Independent Executable to NO, in the Build Settings of the project. When either or both of these flags are set
+        to 'YES', the App loads
+        itself at a fixed memory address, thereby increasing the vulnerability
+    </description>
+    <remediation>- the application should be compiled with the -fPIE -pie flag ("Generate Position-Dependent Code" build option in Xcode). In the
+        latest version of the XCode, this flag is automatically checked by default. 
+    </remediation>
+</Test_iOS_5>
+<Test_iOS_6>
+    <title>Automatic Reference Counting</title>
+    <owasp>M9 - Reverse Engineering</owasp>
+    <severity>Medium</severity>
+    <Compliance>Not Applicable</Compliance>
+
+    <abstract>Automatic Reference Counting implements automatic memory management for Objective-C objects and blocks,
+        freeing the programmer from the need to explicitly insert retains and releases. It does not provide a cycle
+        collector; users must explicitly manage the lifetime of their objects, breaking cycles manually or with weak or
+        unsafe references.
+    </abstract>
+    <test_function>objc_release_flag_check</test_function>
+    <verification_type>executable</verification_type>
+    <description>ARC protects applications from memory corruption vulnerabilities by moving the responsibility of memory
+        management from the developer to the compiler.
+    </description>
+    <remediation>ARC can be enabled in an application within XCode by setting the compiler option 'Objective-C Automatic
+        Reference Counting' to 'yes'. By default it is marked as 'yes'.
+    </remediation>
+</Test_iOS_6>
+<Test_iOS_7>
+    <title>Third Party Frameworks Scan</title>
+    <owasp>M7 - Client Code Quality</owasp>
+    <severity>Medium</severity>
+    <Compliance>Not Applicable</Compliance>
+    <abstract>Third party libraries are not part of the standard SDK libraries, which may involve certain vulnerabilities</abstract>
+    <test_function>third_party_frameworks_check</test_function>
+    <verification_type>executable</verification_type>
+    <description>Third-party libraries are used by app developers to add functionality to apps, such as using Facebook
+        libraries for authentication. They also enable developers of free apps to make money by linking their app to
+        them; the Google AdMob library, for instance, might access a user's location to target the user with ads, while
+        the Flurry analytics library might gather user information for a marketing profile.
+    </description>
+    <remediation>Security auditing must thoroughly test third-party libraries and functionality as well. This should
+        include core iOS and Android code/libraries. Upgrading to a new version of a third-party library (or OS version)
+        should be treated as version of your app. An updated third-party library (or new OS version) can contain new
+        vulnerabilities or expose issues in your code. They should be tested just like you test new code for your app.
+        On iOS, statically compile third-party libraries to avoid LD_PRELOAD attacks; in such attacks a library and its
+        functions can be swapped out for an attacker's library with functions replaced with malicious code.
+    </remediation>
+</Test_iOS_7>
+</Tests>
+

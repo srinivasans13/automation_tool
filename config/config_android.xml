@@ -1,0 +1,137 @@
+<Tests>
+    <Test_Android_1>
+        <title>Signing Info Verification</title>
+        <owasp>M9 - Reverse Engineering</owasp>
+        <Compliance>NIST SP800-53 R2 SC-18</Compliance>
+        <abstract>An App signed with debug key cannot be published to Google Play Store. However, it can be distributed
+            via unauthorized parties or stores.
+        </abstract>
+        <test_function>check_signing_info</test_function>
+        <component_type>apktool</component_type>
+        <severity>MEDIUM</severity>
+        <description>If Android App is signed with a debug key that is created by the Android SDK build tools. If debug
+            mode is used to build your App, the SDK tools invoke Keytool utility (included in the JDK) available
+            publicly to create the debug keystore/key with predetermined names/passwords: Keystore name:
+            "debug.keystore" Keystore password: "android" Key alias: "androiddebugkey" Key password: "android" CN:
+            "CN=Android Debug,O=Android,C=US" To release the App for end-users, it must be signed with a suitable
+            private key owned by a developer as it cannot be published to "Google Play Store".
+        </description>
+        <remediation>Developers should build the App in release mode and use their own private key to sign the App.
+        </remediation>
+    </Test_Android_1>
+    <Test_Android_2>
+        <title>Android XML Content Verification</title>
+        <owasp>M1 - Improper Platform Usage</owasp>
+        <Compliance>PCI DSS v1.2 5.1 HIPAA 164.308 (a)(5)(ii)(B) NIST SP800</Compliance>
+        <abstract>A Service is an App component that can perform long-running operations in the background and does not
+            provide a user interface. Another App component can start a service and it will continue to run in the
+            background even if the user switches to another App. Any malicious App can access the service of the App if
+            proper permissions are not set for the App services, which may lead to breach of Integrity.The allowBackup
+            attribute determines if an App data can be backed up and restored on external memory. This may have security
+            consequences for an App. Once the data is backed up, all App data can be read by the malicious user, which
+            might contain sensitive information and can be read or manipulated by the attacker. This may lead to breach
+            of Confidentiality and Privacy.Android allows a developer to debug the App during development. The debugging
+            mode can be activated by setting 'android:debuggable' attribute to true in AndroidManifest.xml file of the
+            App. An attacker can establish a connection between debugger and malicious App, which may allow manipulation
+            of the legitimate App. This can result in the execution of an arbitrary code and undesirable disclosure of
+            sensitive data, which may lead to breach of Integrity and Confidentiality.
+        </abstract>
+        <test_function>android_xml_content_verification</test_function>
+        <component_type>apktool</component_type>
+        <severity>MEDIUM</severity>
+        <description>Characterizes the potential risk implied in the permission and indicates the procedure the system
+            should follow when determining whether or not to grant the permission to an application requesting
+            it.Normal,Dangerous,Signature and Signature or System are the base permission types.Each protection level
+            consists of a base permission type and zero or more flags. For example, the "dangerous" protection level has
+            no flags. In contrast, the protection level "signature|privileged" is a combination of the "signature" base
+            permission type and the "privileged" flag.A permission that the system grants only if the requesting
+            application is signed with the same certificate as the application that declared the permission. If the
+            certificates match, the system automatically grants the permission without notifying the user or asking for
+            the user's explicit approval.
+        </description>
+        <remediation>Set "android: exported" = "false" for all Services which do not interact with other Apps.Specify
+            appropriate permissions, if it is required to allow other Apps to invoke the service or interact with it.If
+            different permissions are needed for different callable Service methods, insert checkCallingPermission()
+            calls in the methods. The following example demonstrates how to set permission in Service
+            tag:>Example:service android:name=".MailListenerService"
+            android:permission="com.example.perm.BIND_TO_MSG_LISTENER" android:enabled="true" android:exported="true">
+            service> Developer should explicitly set 'android:allowBackup' to 'false' under App tag in
+            Androidmanifest.xml. The following code snippet demonstrates how to disable App backup:Example:App
+            android:icon="@drawable/icon" android:allowBackup="false" >Set "android:debuggable" = "false" in application
+            tag of App Manifest file to prevent run time manipulation by an attacker or malware
+        </remediation>
+    </Test_Android_2>
+    <Test_Android_3>
+        <title>Permissions Scan</title>
+        <owasp>M1 - Improper Platform Usage</owasp>
+        <Compliance>PPCI DSS v1.2 7.1.1 HIPAA 164.308 (a)(3)(ii)(A) NIST SP</Compliance>
+        <abstract>Developer can define custom permissions to protect publicly available activities and custom data
+            providers in App. If protection level of custom permission is not declared securely, then the permission
+            gives access to private data or has another potentially negative impact such as using contact list,
+            accessing calendar and so on. This may result in loss of Confidentiality.
+        </abstract>
+        <test_function>check_permissions</test_function>
+        <component_type>apktool</component_type>
+        <severity>MEDIUM</severity>
+        <description>There are different protection levels, using which an App can declare access to available
+            activities and custom data providers. Apps having custom permission as normal or dangerous are prone to
+            security attacks.The normal custom permission is a default value. It gives requesting Apps, access to
+            isolated App-level features. The system automatically grants this type of permission to a requesting App at
+            installation, without asking for the user's explicit approval. Whereas dangerous custom permission gives a
+            requesting App access to private user data or control over the device that can negatively impact the user.
+        </description>
+        <remediation>Have 'signature' based custom permission. The following code snippet demonstrates how to set custom
+            permission: Example:permission android:name="com.example.perm.READ_INCOMING_MSG"
+            android.protectionLevel="signature" android:permissionGroup="android.permission-group.PERSONAL_INFO"/>
+            Reference: http://developer.android.com/guide/topics/manifest/permission-element.html
+        </remediation>
+    </Test_Android_3>
+    <Test_Android_4>
+        <title>Smali Files Scan</title>
+        <owasp>M10 - Lack of Binary Protections</owasp>
+        <Compliance>Not Applicable</Compliance>
+        <abstract>Obfuscation is the deliberate act of creating obfuscated code, i.e. source or machine code that is
+            difficult for humans to understand
+        </abstract>
+        <test_function>check_smali_files</test_function>
+        <component_type>apktool</component_type>
+        <severity>MEDIUM</severity>
+        <description>Check for the unencrypted data present in smali files.Programmers must deliberately obfuscate code
+            to conceal its purpose or its logic, in order to prevent tampering, deter reverse engineering, or as a
+            puzzle or recreational challenge for someone reading the source code
+        </description>
+        <remediation>Use Dotfuscator or similar tools to obfuscate the code before delivering to the client.
+        </remediation>
+    </Test_Android_4>
+    <Test_Android_5>
+        <title>Asset Folder Scan</title>
+        <owasp>M10 - Lack of Binary Protections</owasp>
+        <Compliance>NIST SP800-53 R2 CM-5</Compliance>
+        <abstract>In CORS, XMLHttpRequest are allowed to be sent across domains without asking the user for permission,
+            thus actually requests are sent without the user noticing them. This can be used to break the security
+            requirement Access control through abusing a user session. This might lead to breach of Accountability and
+            Integrity.Malicious apps / Attackers can modify the app's presentation layer (HTML/JS/CSS) of the app within
+            the phone and execute modified JavaScript. This allows attackers/malious apps to perform some hidden
+            malicious activity.
+        </abstract>
+        <test_function>check_assets_folder</test_function>
+        <component_type>apktool</component_type>
+        <severity>MEDIUM</severity>
+        <description>Check that "Allow-Intent-Navigation" and "Access-Control-Allow-Origin" is not set to *.Also check
+            for the presence of config.xml and Network-Security-Config.xml file.Cross-Origin Resource Sharing (CORS)
+            enables clients making cross origin requests using XMLHttpRequests. It makes it possible to send
+            XMLHttpRequests across domains if a new HTTP header which is called 'Access-Control-Allow-Origin' is
+            defined. With this HTTP header a website can allow to be accessed by an XMLHttpRequest sent from JavaScript
+            running under a foreign domain. A web App built out of many parts of different origins can send requests
+            using XMLHttpRequest to foreign domains as well to update the data on the Client.The app must be able to
+            detect code tampering at runtime. The app must be able to react appropriately at runtime to a code integrity
+            violation, otherwise This can lead to breach of Confidentiality and Integrity of Data.
+        </description>
+        <remediation>Do not set the header "Access-Control-Allow-Origin" and "Allow-Intent-Navigation" to *.Set the
+            Access-Control-Allow-Origin header to specific domain name(s)Example:Access-Control-Allow-Origin:
+            www.mydomain.comDo not base access control on the origin header. An attacker through sending a faked origin
+            header can modify this header.App can consist of zipped www folder. This folder must be unzipped at ,
+            runtime when it is needed. Only App native source code should be able to extract/access its files.
+        </remediation>
+    </Test_Android_5>
+</Tests>
